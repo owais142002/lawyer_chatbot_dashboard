@@ -1,10 +1,11 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Home from './pages/Home';
-import FetchNamespaces from './pages/FetchNamespaces';
-import ManageDocuments from './pages/ManageDocuments';
-import EmbedDocument from './pages/EmbedDocument';
-import Navbar from './components/Navbar';
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Home from "./pages/Home";
+import FetchNamespaces from "./pages/FetchNamespaces";
+import ManageDocuments from "./pages/ManageDocuments";
+import EmbedDocument from "./pages/EmbedDocument";
+import Navbar from "./components/Navbar";
+import SystemMessage from "./pages/SystemMessage";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
             <Route path="/fetch-namespaces" element={<FetchNamespaces />} />
             <Route path="/manage-documents" element={<ManageDocuments />} />
             <Route path="/embed-document" element={<EmbedDocument />} />
+            <Route path="/system-message" element={<SystemMessage />} />
           </Routes>
         </div>
       </div>
