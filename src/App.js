@@ -1,24 +1,26 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Home from './pages/Home';
+import FetchNamespaces from './pages/FetchNamespaces';
+import ManageDocuments from './pages/ManageDocuments';
+import EmbedDocument from './pages/EmbedDocument';
+import Navbar from './components/Navbar';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        <Navbar />
+        <div className="container mx-auto mt-8">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/fetch-namespaces" element={<FetchNamespaces />} />
+            <Route path="/manage-documents" element={<ManageDocuments />} />
+            <Route path="/embed-document" element={<EmbedDocument />} />
+          </Routes>
+        </div>
+      </div>
+    </Router>
   );
 }
 
