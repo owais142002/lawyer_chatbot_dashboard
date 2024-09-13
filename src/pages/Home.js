@@ -109,7 +109,7 @@ function Home() {
   return (
     <div className="p-8 flex flex-col h-screen">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Chat with Legal AI</h1>
+        <h1 className="text-2xl font-bold">Chat with Rehani's Hani AI</h1>
         <button
           className="bg-red-500 text-white px-4 py-2 rounded-lg"
           onClick={handleClearChat}
