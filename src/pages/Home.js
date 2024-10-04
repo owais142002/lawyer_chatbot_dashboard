@@ -1,52 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { fetchNamespaces } from '../api';
+import { API_BASE_URL } from "../apiConfig";
 
-const API_BASE_URL =  "https://render-dev-ke.rehanisoko-internal.com/api/v1/chatbot/lawyer";
-const BEARER_TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI4MTU5MTM1LCJpYXQiOjE3MjU1NjcxMzUsImp0aSI6ImU3NDRmYzlkZjE2ZjRjMGI4NzI0YjRhZGFmOWYwMzljIiwidXNlcl9pZCI6M30.zKHji53kH1WyNrPz8kzvaaSfeAG_CagRsAJxX9Lvggw';
+const API_BASE_URL_LAWYER = `${API_BASE_URL}/chatbot/lawyer`;
 
 function Home() {
   const [countries, setCountries] = useState([]);
-  const [namespaces, setNamespaces] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState('');
-  const [selectedNamespace, setSelectedNamespace] = useState('');
   const [query, setQuery] = useState('');
   const [chatHistory, setChatHistory] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch namespaces on page load
   useEffect(() => {
     fetchNamespaces()
       .then(response => {
-        const data = response.data.data;
-        setCountries(Object.keys(data));
+        const namespaces = response.data.namespaces;
+        setCountries(namespaces);
       })
       .catch(err => console.error('Error fetching countries:', err));
 
-    // Fetch chat history
     getChatHistory();
   }, []);
 
-  // Fetch namespaces when country is selected
-  const handleCountryChange = (e) => {
-    const country = e.target.value;
-    setSelectedCountry(country);
-    setSelectedNamespace('');
-    if (country) {
-      fetchNamespaces()
-        .then(response => {
-          setNamespaces(response.data.data[country] || []);
-        })
-        .catch(err => console.error('Error fetching namespaces:', err));
-    }
-  };
-
-  // Fetch chat history
   const getChatHistory = () => {
+    const token = localStorage.getItem('access_token');
     axios
-      .get(`${API_BASE_URL}/get-chat-history/`, {
+      .get(`${API_BASE_URL_LAWYER}/get-chat-history/`, {
         headers: {
-          Authorization: BEARER_TOKEN,
+          Authorization: `Bearer ${token}`,
         },
       })
       .then(response => {
@@ -57,45 +39,78 @@ function Home() {
       });
   };
 
-  // Handle sending the query
-  const handleSendQuery = () => {
-    if (!query || !selectedCountry || !selectedNamespace) {
-      alert('Please select country, namespace, and enter a query');
+  const handleSendQuery = async () => {
+    if (!query || !selectedCountry) {
+      alert('Please select a country and enter a query');
       return;
     }
-
+  
     setLoading(true);
-    axios
-      .post(
-        `${API_BASE_URL}/query/`,
-        { query, country: selectedCountry, namespace: selectedNamespace },
-        {
-          headers: {
-            Authorization: BEARER_TOKEN,
-          },
-        }
-      )
-      .then(response => {
-        setChatHistory([
-          ...chatHistory,
-          { type: 'human', content: query },
-          { type: 'ai', content: response.data.result },
-        ]);
-        setQuery('');
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error sending query:', err);
-        setLoading(false);
+    const token = localStorage.getItem('access_token');
+  
+    try {
+      const response = await fetch(`${API_BASE_URL_LAWYER}/query/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ query, country: selectedCountry }),
       });
+  
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let partialMessage = ''; // This will hold the accumulating AI response
+  
+      // Push user's query to chatHistory immediately
+      setChatHistory((prevChatHistory) => [
+        ...prevChatHistory,
+        { type: 'human', content: query },
+      ]);
+  
+      // Add an initial empty entry for the AI response to update progressively
+      setChatHistory((prevChatHistory) => [
+        ...prevChatHistory,
+        { type: 'ai', content: '' },
+      ]);
+  
+      let doneReading = false;
+      while (!doneReading) {
+        const { done, value } = await reader.read();
+        doneReading = done;
+  
+        // Decode the received chunk
+        const chunk = decoder.decode(value, { stream: true });
+        partialMessage += chunk; // Accumulate the streamed content
+  
+        // Update the AI message in the chat as the stream progresses
+        setChatHistory((prevChatHistory) => {
+          // Ensure we're only updating the last AI response entry
+          const updatedChat = [...prevChatHistory];
+          const lastIndex = updatedChat.length - 1;
+  
+          if (updatedChat[lastIndex]?.type === 'ai') {
+            // Replace the last AI response with the updated message
+            updatedChat[lastIndex].content = partialMessage;
+          }
+  
+          return updatedChat;
+        });
+      }
+    } catch (error) {
+      console.error('Error sending query:', error);
+    } finally {
+      setQuery('');
+      setLoading(false);
+    }
   };
 
-  // Handle clearing chat history
   const handleClearChat = () => {
+    const token = localStorage.getItem('access_token');
     axios
-      .get(`${API_BASE_URL}/clear-chat-history/`, {
+      .get(`${API_BASE_URL_LAWYER}/clear-chat-history/`, {
         headers: {
-          Authorization: BEARER_TOKEN,
+          Authorization: `Bearer ${token}`,
         },
       })
       .then(() => {
@@ -118,12 +133,11 @@ function Home() {
         </button>
       </div>
 
-      {/* Dropdowns for Country and Namespace */}
       <div className="mb-6">
         <select
           className="border p-2 rounded w-full mb-4"
           value={selectedCountry}
-          onChange={handleCountryChange}
+          onChange={(e) => setSelectedCountry(e.target.value)}
         >
           <option value="">Select Country</option>
           {countries.map(country => (
@@ -132,23 +146,8 @@ function Home() {
             </option>
           ))}
         </select>
-
-        <select
-          className="border p-2 rounded w-full mb-4"
-          value={selectedNamespace}
-          onChange={(e) => setSelectedNamespace(e.target.value)}
-          disabled={!selectedCountry}
-        >
-          <option value="">Select Namespace</option>
-          {namespaces.map(namespace => (
-            <option key={namespace} value={namespace}>
-              {namespace}
-            </option>
-          ))}
-        </select>
       </div>
 
-      {/* Chat History */}
       <div className="flex-grow bg-gray-100 p-4 rounded-lg mb-6 max-h-96 overflow-y-auto">
         {chatHistory.map((chat, index) => (
           <div
@@ -163,7 +162,6 @@ function Home() {
         {loading && <div className="text-center text-gray-500">Loading...</div>}
       </div>
 
-      {/* Query Input */}
       <div className="flex mb-4">
         <input
           className="border p-2 rounded-lg flex-grow mr-2"

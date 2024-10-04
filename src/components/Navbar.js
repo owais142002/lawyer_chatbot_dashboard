@@ -11,18 +11,12 @@ function Navbar() {
           </Link>
         </li>
         <li>
-          <Link
-            to="/fetch-namespaces"
-            className="text-white hover:text-gray-400"
-          >
+          <Link to="/fetch-namespaces" className="text-white hover:text-gray-400">
             Namespaces Management
           </Link>
         </li>
         <li>
-          <Link
-            to="/manage-documents"
-            className="text-white hover:text-gray-400"
-          >
+          <Link to="/manage-documents" className="text-white hover:text-gray-400">
             Manage Documents
           </Link>
         </li>
@@ -34,6 +28,11 @@ function Navbar() {
         <li>
           <Link to="/system-message" className="text-white hover:text-gray-400">
             System Message
+          </Link>
+        </li>
+        <li>
+          <Link to="/settings" className="text-white hover:text-gray-400">
+            Settings
           </Link>
         </li>
       </ul>

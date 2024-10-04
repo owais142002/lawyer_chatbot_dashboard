@@ -1,72 +1,55 @@
 import axios from "axios";
-
-const API_BASE_URL =
-  "https://render-dev-ke.rehanisoko-internal.com/api/v1/chatbot/lawyer";
+import { API_BASE_URL } from "../apiConfig"; // Import the centralized URL
 
 export const fetchNamespaces = async () => {
-  return axios.get(`${API_BASE_URL}/fetch-namespaces/`);
+  return axios.get(`${API_BASE_URL}/chatbot/lawyer/fetch-namespaces/`);
 };
 
-export const fetchNamespacesData = async (country, namespace, page) => {
-  return axios.post(`${API_BASE_URL}/fetch-namespaces-data/`, {
+export const fetchNamespacesData = async (country, page) => {
+  return axios.post(`${API_BASE_URL}/chatbot/lawyer/fetch-namespaces-data/`, {
     country,
-    namespace,
     page,
   });
 };
 
-export const deleteEmbedding = async (country, namespace, link) => {
-  return axios.post(`${API_BASE_URL}/delete-embedding/`, {
+export const deleteEmbedding = async (country, link) => {
+  return axios.post(`${API_BASE_URL}/chatbot/lawyer/delete-embedding/`, {
     country,
-    namespace,
     link,
   });
 };
 
-export const embedDocument = async (fileURL, country, namespace, metadata) => {
-  return axios.post(`${API_BASE_URL}/embed/`, {
+export const embedDocument = async (fileURL, country, category, metadata) => {
+  return axios.post(`${API_BASE_URL}/chatbot/lawyer/embed/`, {
     fileURL,
     country,
-    namespace,
+    category,
     metadata,
   });
 };
 
-export const createNewCountry = async (country, namespace) => {
-  return axios.post(`${API_BASE_URL}/create-new-country/`, {
+export const createNewCountry = async (country) => {
+  return axios.post(`${API_BASE_URL}/chatbot/lawyer/create-new-country/`, {
     country,
-    namespace,
-  });
-};
-
-export const addNamespace = async (country, namespace) => {
-  return axios.post(`${API_BASE_URL}/add-namespace/`, { country, namespace });
-};
-
-export const deleteNamespace = async (country, namespace) => {
-  return axios.post(`${API_BASE_URL}/delete-namespace/`, {
-    country,
-    namespace,
   });
 };
 
 export const deleteCountry = async (country) => {
-  return axios.post(`${API_BASE_URL}/delete-country/`, { country });
+  return axios.post(`${API_BASE_URL}/chatbot/lawyer/delete-country/`, { country });
 };
 
-export const getUniqueLinks = async (country, namespace) => {
-  return axios.post(`${API_BASE_URL}/get-unique-links/`, {
+export const getUniqueLinks = async (country) => {
+  return axios.post(`${API_BASE_URL}/chatbot/lawyer/get-unique-links/`, {
     country,
-    namespace,
   });
 };
 
 export const getSystemMessage = async () => {
-  return axios.get(`${API_BASE_URL}/system-message/`);
+  return axios.get(`${API_BASE_URL}/chatbot/lawyer/system-message/`);
 };
 
 export const updateSystemMessage = async (system_message) => {
-  return axios.post(`${API_BASE_URL}/system-message/`, {
+  return axios.post(`${API_BASE_URL}/chatbot/lawyer/system-message/`, {
     system_message,
   });
 };
